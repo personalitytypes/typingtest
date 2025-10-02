@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Typing Test</title>
+<style>
+   body { font-family: Arial; margin: 50px; }
+   #text { margin-bottom: 20px; }
+   textarea { width: 100%; height: 100px; }
+</style>
+</head>
+<body>
+<h2>Typing Test</h2>
+<p id="text">กรุณาพิมพ์ประโยคนี้ให้เหมือนเดิมทุกตัวอักษรเพื่อทดสอบความเร็วและความแม่นยำ</p>
+<textarea id="input"></textarea>
+<button onclick="check()">Submit</button>
+<p id="result"></p>
+<script>
+   let start = Date.now();
+   function check() {
+     let original = document.getElementById("text").innerText;
+     let typed = document.getElementById("input").value;
+     let time = (Date.now() - start) / 1000 / 60; // minutes
+     let words = typed.split(" ").length;
+     let wpm = Math.round(words / time);
+     let accuracy = Math.round((typed.length - [...typed].filter((c,i)=>c!==original[i]).length) / original.length * 100);
+     document.getElementById("result").innerText = `ความเร็ว: ${wpm} WPM | ความแม่นยำ: ${accuracy}%`;
+   }
+</script>
+</body>
+</html>
