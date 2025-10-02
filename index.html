@@ -1,30 +1,245 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-<title>Typing Test</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Typing Test (60s) • Call Center – Insurance Sales</title>
 <style>
-   body { font-family: Arial; margin: 50px; }
-   #text { margin-bottom: 20px; }
-   textarea { width: 100%; height: 100px; }
+   :root { --gap:14px; --border:#e5e7eb; --accent:#2563eb; }
+   body { font-family: system-ui, Arial, sans-serif; margin: 32px; line-height: 1.55; background:#fff; }
+   .wrap { max-width: 960px; margin:auto; }
+   h1 { margin: 0 0 6px; font-size: 22px; }
+   .sub { color:#6b7280; margin-bottom: 18px; }
+   .box { border:1px solid var(--border); border-radius:12px; padding:18px; background:#fff; }
+   #prompt { background:#f8fafc; border:1px dashed var(--border); padding:16px; border-radius:10px; white-space:pre-wrap }
+   textarea { width:100%; min-height:140px; padding:12px; border:1px solid var(--border); border-radius:10px; resize:vertical; font-size:16px; }
+   textarea:disabled { background:#f3f4f6; }
+   .row { display:flex; gap:var(--gap); flex-wrap:wrap; align-items:center; }
+   .btn { padding:10px 14px; border:1px solid var(--border); border-radius:10px; cursor:pointer; background:#fff; text-decoration:none; display:inline-block; }
+   .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+   .stat { flex:1 1 150px; border:1px solid var(--border); border-radius:10px; padding:10px 12px; text-align:center; }
+   .stat b { display:block; font-size:22px; }
+   .muted { color:#6b7280; font-size:13px; }
+   .footer { color:#9ca3af; margin-top:18px; font-size:12px; }
+   mark { background:#fff3c4; padding:0 2px; }
+   select, input[type="email"], input[type="text"] { padding:8px 10px; border:1px solid var(--border); border-radius:10px; }
+   .hdr { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+   .formrow { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+   .formrow > div { display:flex; flex-direction:column; gap:6px; }
+   label { font-size:12px; color:#6b7280; }
+   .sep { height:12px; }
 </style>
 </head>
 <body>
-<h2>Typing Test</h2>
-<p id="text">กรุณาพิมพ์ประโยคนี้ให้เหมือนเดิมทุกตัวอักษรเพื่อทดสอบความเร็วและความแม่นยำ</p>
-<textarea id="input"></textarea>
-<button onclick="check()">Submit</button>
-<p id="result"></p>
+<div class="wrap">
+<div class="hdr">
+<div>
+<h1>Typing Test — 60 วินาที</h1>
+<div class="sub">เนื้อหาจำลองการขายประกัน (Call Center) • ไทย+อังกฤษสลับบรรทัด</div>
+</div>
+<div>
+<label class="muted">ภาษา: </label>
+<select id="langSelect" title="เลือกภาษา">
+<option value="MIX">MIX (ไทย+อังกฤษ)</option>
+</select>
+</div>
+</div>
+<!-- ข้อมูลผู้สมัคร -->
+<div class="box">
+<div class="formrow">
+<div>
+<label for="candName">ชื่อผู้สมัคร / Candidate name</label>
+<input id="candName" type="text" placeholder="เช่น นางสาว กนกวรรณ ศรีสุข / John Doe" />
+</div>
+<div>
+<label for="recEmail">อีเมลผู้รับผล (Recruiter)</label>
+<input id="recEmail" type="email" placeholder="recruiter@company.com" />
+</div>
+<div>
+<label for="jobRef">ตำแหน่ง/อ้างอิง</label>
+<input id="jobRef" type="text" placeholder="Call Center – Non-Life" />
+</div>
+</div>
+</div>
+<div class="sep"></div>
+<div class="box" id="promptBox">
+<div id="prompt"></div>
+</div>
+<div class="sep"></div>
+<div class="row">
+<div class="stat"><span class="muted">เวลา</span><b id="time">60s</b></div>
+<div class="stat"><span class="muted">WPM</span><b id="wpm">0</b></div>
+<div class="stat"><span class="muted">Accuracy</span><b id="acc">0%</b></div>
+<div class="stat"><span class="muted">ผิดพลาด</span><b id="errors">0</b></div>
+</div>
+<div class="sep"></div>
+<textarea id="input" placeholder="กด 'เริ่มทดสอบ'..." disabled
+             onpaste="event.preventDefault(); alert('ห้ามวางข้อความ (paste)');"></textarea>
+<div class="sep"></div>
+<div class="row">
+<button class="btn primary" id="startBtn">เริ่มทดสอบ</button>
+<button class="btn" id="resetBtn" disabled>เริ่มใหม่</button>
+<a class="btn" id="shareBtn" href="#" aria-disabled="true">✉️ แชร์ผลทางอีเมล</a>
+<div class="muted">* เริ่มใหม่ได้ไม่จำกัดรอบ → เมื่อมั่นใจว่าได้ผลดีที่สุดแล้ว ค่อยกดแชร์ผล</div>
+</div>
+<div class="footer">Prompted by dditsaya | Engineered by ChatGPT</div>
+</div>
 <script>
-   let start = Date.now();
-   function check() {
-     let original = document.getElementById("text").innerText;
-     let typed = document.getElementById("input").value;
-     let time = (Date.now() - start) / 1000 / 60; // minutes
-     let words = typed.split(" ").length;
-     let wpm = Math.round(words / time);
-     let accuracy = Math.round((typed.length - [...typed].filter((c,i)=>c!==original[i]).length) / original.length * 100);
-     document.getElementById("result").innerText = `ความเร็ว: ${wpm} WPM | ความแม่นยำ: ${accuracy}%`;
-   }
+const DEFAULT_RECRUITER_EMAIL = "hr@yourcompany.co.th";
+// ----------- เนื้อหาทดสอบ (3 เวอร์ชันสุ่ม) -----------
+function interleave(thArr, enArr) {
+ const out = [];
+ const L = Math.max(thArr.length, enArr.length);
+ for (let i=0;i<L;i++){ if(thArr[i]) out.push(thArr[i]); if(enArr[i]) out.push(enArr[i]); }
+ return out.join("\n");
+}
+// V1
+const V1_TH = [
+"ชื่อลูกค้า: นายสมชาย ใจดี อายุ 35 ปี เบอร์ติดต่อ 081-234-5678",
+"อีเมลสำหรับส่งเอกสาร: somchai.j@example.com",
+"ข้อมูลรถยนต์: Toyota Vios ปี 2020 สีดำ ทะเบียน 5กข-1234 กรุงเทพมหานคร",
+"ประเภทประกันที่เลือก: ชั้น 1 พร้อมความคุ้มครองผู้โดยสารสูงสุด 200,000 บาท",
+"วันที่เริ่มคุ้มครอง: 01/11/2025 เวลา 00:01 น."
+];
+const V1_EN = [
+"Customer Name: Mr. Somchai Jaidee, age 35, contact number 081-234-5678.",
+"Email for documents: somchai.j@example.com.",
+"Vehicle details: Toyota Vios, year 2020, black color, license plate 5KK-1234 Bangkok.",
+"Selected insurance plan: Type 1 with passenger coverage up to 200,000 THB.",
+"Coverage start date: 01/11/2025 at 00:01 hrs."
+];
+// V2
+const V2_TH = [
+"ชื่อลูกค้า: นางสาวพรทิพย์ แก้วใส อายุ 29 ปี เบอร์ติดต่อ 089-765-4321",
+"อีเมลสำหรับส่งเอกสาร: porntip.k@example.com",
+"ข้อมูลรถยนต์: Honda Civic ปี 2019 สีขาว ทะเบียน 7ขร-5678 เชียงใหม่",
+"ประเภทประกันที่เลือก: ชั้น 2+ พร้อมความคุ้มครองทรัพย์สินบุคคลภายนอกสูงสุด 1,000,000 บาท",
+"วันที่เริ่มคุ้มครอง: 15/12/2025 เวลา 12:00 น."
+];
+const V2_EN = [
+"Customer Name: Ms. Porntip Kaewsai, age 29, contact number 089-765-4321.",
+"Email for documents: porntip.k@example.com.",
+"Vehicle details: Honda Civic, year 2019, white color, license plate 7CR-5678 Chiang Mai.",
+"Selected insurance plan: Type 2+ with third-party property coverage up to 1,000,000 THB.",
+"Coverage start date: 15/12/2025 at 12:00 hrs."
+];
+// V3
+const V3_TH = [
+"ชื่อลูกค้า: นายอนันต์ วิริยะ อายุ 42 ปี เบอร์ติดต่อ 086-111-2222",
+"อีเมลสำหรับส่งเอกสาร: anan.w@example.com",
+"ข้อมูลรถยนต์: Nissan Almera ปี 2021 สีแดง ทะเบียน 9ฆฏ-9876 ขอนแก่น",
+"ประเภทประกันที่เลือก: ชั้น 3+ ครอบคลุมคู่กรณีและบุคคลที่สาม",
+"วันที่เริ่มคุ้มครอง: 05/01/2026 เวลา 09:30 น."
+];
+const V3_EN = [
+"Customer Name: Mr. Anan Wiriya, age 42, contact number 086-111-2222.",
+"Email for documents: anan.w@example.com.",
+"Vehicle details: Nissan Almera, year 2021, red color, license plate 9KT-9876 Khon Kaen.",
+"Selected insurance plan: Type 3+ covering third-party liability.",
+"Coverage start date: 05/01/2026 at 09:30 hrs."
+];
+const MIX_VERSIONS = [
+ interleave(V1_TH,V1_EN),
+ interleave(V2_TH,V2_EN),
+ interleave(V3_TH,V3_EN)
+];
+let testText = MIX_VERSIONS[Math.floor(Math.random()*MIX_VERSIONS.length)];
+// ----------- DOM -----------
+const promptEl=document.getElementById("prompt");
+const inputEl=document.getElementById("input");
+const timeEl=document.getElementById("time");
+const wpmEl=document.getElementById("wpm");
+const accEl=document.getElementById("acc");
+const errEl=document.getElementById("errors");
+const startBtn=document.getElementById("startBtn");
+const resetBtn=document.getElementById("resetBtn");
+const shareBtn=document.getElementById("shareBtn");
+const candNameEl=document.getElementById("candName");
+const recEmailEl=document.getElementById("recEmail");
+const jobRefEl=document.getElementById("jobRef");
+// ----------- State -----------
+let seconds=60,timer=null,startedAt=null,finishedAt=null;
+recEmailEl.value=DEFAULT_RECRUITER_EMAIL;
+// ----------- Functions -----------
+function renderPrompt(idx=0){
+ const s=testText;
+ const esc=t=>t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+ const a=esc(s.slice(0,idx));
+ const b=esc(s.charAt(idx)||"");
+ const c=esc(s.slice(idx+1));
+ promptEl.innerHTML=`${a}<mark>${b||" "}</mark>${c}`;
+}
+function reset(){
+ seconds=60;clearInterval(timer);timer=null;
+ startedAt=null;finishedAt=null;
+ inputEl.value="";inputEl.disabled=true;
+ startBtn.disabled=false;resetBtn.disabled=true;
+ timeEl.textContent="60s";wpmEl.textContent="0";accEl.textContent="0%";errEl.textContent="0";
+ testText=MIX_VERSIONS[Math.floor(Math.random()*MIX_VERSIONS.length)];
+ renderPrompt(0);
+}
+function start(){
+ if(timer) return;
+ startedAt=new Date();startBtn.disabled=true;resetBtn.disabled=false;
+ inputEl.disabled=false;inputEl.focus();
+ timer=setInterval(tick,1000);
+}
+function finish(){
+ clearInterval(timer);timer=null;inputEl.disabled=true;startBtn.disabled=false;
+ finishedAt=new Date();
+}
+function tick(){
+ seconds--;timeEl.textContent=seconds+"s";updateStats();
+ if(seconds<=0){timeEl.textContent="0s";updateStats(true);finish();}
+}
+function computeStats(){
+ const typed=inputEl.value, len=typed.length;
+ let correct=0,errors=0;
+ for(let i=0;i<len;i++){ if(typed[i]===testText[i]) correct++; else errors++; }
+ const elapsedMs=startedAt?((finishedAt||new Date())-startedAt):1;
+ const minutes=Math.max(elapsedMs/60000,1/60);
+ const netWPM=Math.max(0,Math.round((correct/5)/minutes));
+ const acc=len?Math.max(0,Math.round((correct/len)*100)):0;
+ return{typedLen:len,correct,errors,minutes,netWPM,accuracy:acc};
+}
+function updateStats(force=false){
+ const {typedLen,errors,netWPM,accuracy}=computeStats();
+ wpmEl.textContent=String(netWPM);accEl.textContent=accuracy+"%";errEl.textContent=String(errors);
+ renderPrompt(Math.min(typedLen,testText.length));
+ if(!force && typedLen>=testText.length) finish();
+}
+// ----------- Events -----------
+startBtn.onclick=start;
+resetBtn.onclick=()=>reset();
+inputEl.oninput=()=>updateStats();
+inputEl.ondrop=e=>e.preventDefault();
+shareBtn.onclick=function(e){
+ e.preventDefault();
+ if(!startedAt||!finishedAt){alert("โปรดทำแบบทดสอบจนจบ และเลือกผลที่ดีที่สุดก่อนแชร์");return;}
+ const rec=(recEmailEl.value||DEFAULT_RECRUITER_EMAIL).trim();
+ const name=(candNameEl.value||"Unknown Candidate").trim();
+ const job=(jobRefEl.value||"Call Center – Non-Life").trim();
+ const {typedLen,errors,netWPM,accuracy}=computeStats();
+ const started=startedAt.toLocaleString();const finished=finishedAt.toLocaleString();
+ const snippet=testText.slice(0,200).replace(/\s+/g," ");
+ const subject=`[Typing Test-MIX] ${name} | ${job} | ${netWPM}WPM/${accuracy}%ACC`;
+ const body=`Candidate: ${name}
+Position/Ref: ${job}
+Language: MIX
+Started: ${started}
+Finished: ${finished}
+RESULTS
+- Net WPM: ${netWPM}
+- Accuracy: ${accuracy}%
+- Errors: ${errors}
+- Typed length: ${typedLen}
+PROMPT (excerpt):
+"${snippet}..."`;
+ const href=`mailto:${encodeURIComponent(rec)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+ window.location.href=href;
+};
+// ----------- Init -----------
+renderPrompt(0);reset();
 </script>
 </body>
 </html>
